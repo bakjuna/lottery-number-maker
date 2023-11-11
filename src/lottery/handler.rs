@@ -1,11 +1,12 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
-use axum::Json;
+use axum::{Json, extract::State};
 use rand::Rng;
 use super::model::Lottery;
-use crate::{Error, Result};
-pub async fn handler_lottery() -> Result<Json<Lottery>> {
+use crate::{Error, Result, AppState};
+pub async fn handler_lottery(State(data): State<Arc<AppState>>) -> Result<Json<Lottery>> {
     println!(" ->> {:<12} - handler-lottery", "GET");
+	println!("{}", data.env.postgres.database);
     let generated_numbers = loop {
         let generated_numbers = generate_number().ok_or(Error::NotFoundError).unwrap();
         if is_distributed(&generated_numbers) {

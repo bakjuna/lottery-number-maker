@@ -1,5 +1,12 @@
+use std::sync::Arc;
+
 use axum::{Router, routing::get};
 
-pub fn router_lottery() -> Router {
-    Router::new().route("/", get(super::handler::handler_lottery))
+use crate::{
+    lottery::handler::handler_lottery, AppState
+};
+
+pub fn router_lottery(app_state: Arc<AppState>) -> Router {
+    Router::new().route("/", get(handler_lottery))
+        .with_state(app_state)
 }
