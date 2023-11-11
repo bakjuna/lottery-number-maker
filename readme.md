@@ -23,9 +23,13 @@ In `main.rs`, there are Axum & tokio-scheduler.
 - Fetch latest lottery numbers by excel, parses it and save it to the database
   - Not yet done
 - Exclude lottery number with duplicated numbers
-  - done
+  - Done
 - Backtesting lottery strategy
   - Not yet done
+- Database Connection
+  - Done
+- Dockerfile
+  - Done
 - Conventional lottery community
   - Not yet done
 
