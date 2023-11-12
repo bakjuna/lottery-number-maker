@@ -14,8 +14,8 @@ services:
     container_name: server
     image: lottery-number-maker
     build:
-      context: lottery-number-maker
-      dockerfile: .Dockerfile
+      context: .
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "8080:8080"

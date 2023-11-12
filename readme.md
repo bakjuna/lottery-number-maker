@@ -33,7 +33,20 @@ In `main.rs`, there are Axum & tokio-scheduler.
 - Conventional lottery community
   - Not yet done
 
-# 
+# How to run this server
+If database is already prepared, just run
+```cargo run```
+
+If you want to isolate all envs such as database, run docker-compose
+```docker-compose up -d```
+
+If you encounter `failed to solve with frontend dockerfile.v0` error, then run
+```
+echo 'export COMPOSE_DOCKER_CLI_BUILD=0' >> ~/.zshrc
+echo 'export DOCKER_BUILDKIT=0' >> ~/.zshrc
+source ~/.zshrc
+```
+and run docker-compose up -d again
 
 # Want to join this toy project?
 Contact me at `bakjuna@gmail.com`, and let's build this shit together!
