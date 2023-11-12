@@ -18,7 +18,6 @@ async fn lottery() -> Result<()> {
 
 	// then
 	assert_eq!(response.status(), 200);
-	// let c = response.json_value::<String>("").unwrap();
 	let value = response.json_body().unwrap();
 	let a = value.get("title").ok_or("err").unwrap();
 	assert_eq!(a, "test");

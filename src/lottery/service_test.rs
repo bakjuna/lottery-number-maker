@@ -32,7 +32,7 @@ mod tests {
                 .returning(|_x| false);
             mock_lottery_service
                 .expect_generate_number()
-                .returning(|| Some(vec![1, 3, 19, 20, 21, 29]));
+                .returning(|| Some(vec![1, 2, 3, 4, 5, 6]));
             Arc::new(mock_lottery_service) as DynLotteryService
         });
         let state = Arc::new(mock_state);

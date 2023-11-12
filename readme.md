@@ -34,19 +34,86 @@ In `main.rs`, there are Axum & tokio-scheduler.
   - Not yet done
 
 # How to run this server
-If database is already prepared, just run
-```cargo run```
+## Build
+### dev
+```
+make build-dev
+```
+### prod
+```
+make build-prod
+```
 
-If you want to isolate all envs such as database, run docker-compose
-```docker-compose up -d```
+## Lint
+```
+make lint
+```
 
+## Compile
+Compile contains copy env files, lint, and build process.
+### dev
+```
+make compile-dev
+```
+### prod
+```
+make compile-prod
+```
+## start server
+This should ensure appropriate database is already started. Otherwise, start docker, not local server.
+### dev
+```
+make start-dev
+```
+### prod
+```
+make start-prod
+```
+
+## watch
+To watch source codes,
+```
+make watch
+```
+If you want to watch test codes, then
+```
+make watch-tests
+```
+
+## Dockerizing
+If you want to isolate all envs such as database, run docker-compose. You can simply start dockerizing with this command.
+```
+make dcr
+```
+
+If you want to stop it, then type
+```
+make dcs
+```
+
+If you want to remove docker images, then type
+```
+make dcd
+```
+
+## Encountered error?
 If you encounter `failed to solve with frontend dockerfile.v0` error, then run
 ```
-echo 'export COMPOSE_DOCKER_CLI_BUILD=0' >> ~/.zshrc
-echo 'export DOCKER_BUILDKIT=0' >> ~/.zshrc
-source ~/.zshrc
+make fix-docker-issue
 ```
-and run docker-compose up -d again
+and run `make dcs` again
+
+## Building an image
+Acutally every time you run docker-compose, it automatically makes an image of this server. But if you want to do that in your local without docker-compose, then see here.
+
+### For ARM Architecture
+```
+make image-mac
+```
+### For AMD64 Architecture
+```
+make image-amd64
+```
 
 # Want to join this toy project?
 Contact me at `bakjuna@gmail.com`, and let's build this shit together!
