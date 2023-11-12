@@ -1,14 +1,15 @@
-use crate::error::BootError;
-use dotenv::dotenv;
-use std::net::SocketAddr;
-use std::sync::Arc;
-
 pub use self::env::EnvVars;
 pub use self::error::{Error, Result};
 pub use self::log::log_request;
+use crate::error::BootError;
+use crate::lottery::service::DynLotteryService;
 use axum::{middleware, Router};
+use dotenv::dotenv;
 use error::BootResult;
+use lottery::service::LotteryService;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use std::net::SocketAddr;
+use std::sync::Arc;
 mod cron;
 mod env;
 mod error;
@@ -16,13 +17,37 @@ mod health;
 mod log;
 mod lottery;
 mod middlewares;
-
-pub struct AppState {
+#[cfg(test)]
+use mockall::automock;
+struct AppState {
     db: Pool<Postgres>,
     env: EnvVars,
+    lottery_service: DynLotteryService,
 }
 
-async fn create_app_state() -> Arc<AppState> {
+#[cfg_attr(test, automock)]
+pub trait AppStateTrait {
+    fn get_db(&self) -> Pool<Postgres>;
+    fn get_env(&self) -> EnvVars;
+    fn get_lottery_service(&self) -> DynLotteryService;
+}
+
+impl AppStateTrait for AppState {
+    fn get_db(&self) -> Pool<Postgres> {
+        self.db.clone()
+    }
+    fn get_env(&self) -> EnvVars {
+        self.env.clone()
+    }
+
+    fn get_lottery_service(&self) -> DynLotteryService {
+        self.lottery_service.clone()
+    }
+}
+
+type DynAppState = Arc<dyn AppStateTrait + Send + Sync>;
+
+async fn create_app_state() -> DynAppState {
     println!("Starting Server...");
     dotenv().ok();
     let envs = EnvVars::new();
@@ -54,16 +79,20 @@ async fn create_app_state() -> Arc<AppState> {
             std::process::exit(1);
         }
     };
+    let envs = EnvVars::new();
+    let service = Arc::new(LotteryService {}) as DynLotteryService;
     Arc::new(AppState {
-        db: pool.clone(),
+        db: pool,
         env: envs,
-    })
+        lottery_service: service,
+    }) as DynAppState
 }
 #[tokio::main]
 async fn main() -> BootResult {
     let app_state = create_app_state().await;
-    let ip_addr = app_state.clone().env.server.address;
-    let port = app_state.clone().env.server.port;
+
+    let ip_addr = app_state.get_env().server.address;
+    let port = app_state.get_env().server.port;
     let cron_jobs = cron::creator::create_cron_jobs().await.unwrap();
     cron_jobs.start().await.unwrap();
 
@@ -73,8 +102,6 @@ async fn main() -> BootResult {
         .layer(middleware::map_response(
             middlewares::middleware::main_response_mapper,
         ));
-
-
     let addr = SocketAddr::new(ip_addr, port);
     println!("->> LISTENING on {addr} \n");
 

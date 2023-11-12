@@ -2,17 +2,17 @@ use std::{
     env,
     net::{IpAddr, Ipv4Addr},
 };
-
+#[derive(Debug, Clone)]
 pub struct EnvVars {
     pub postgres: Postgres,
     pub server: Server,
 }
-
+#[derive(Debug, Clone)]
 pub struct Server {
     pub address: IpAddr,
     pub port: u16,
 }
-
+#[derive(Debug, Clone)]
 pub struct Postgres {
     pub user: String,
     pub password: String,

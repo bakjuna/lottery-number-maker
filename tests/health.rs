@@ -1,9 +1,6 @@
 use anyhow::Result;
 use httpc_test::Response;
 
-// cargo watch -q -c -w src/ -x run
-
-// cargo watch -q -c -w tests/ -x "test -q health -- --nocapture"
 #[tokio::test]
 async fn health() -> Result<()> {
 	let hc = httpc_test::new_client("http://localhost:8080")?;

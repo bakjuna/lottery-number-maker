@@ -1,72 +1,27 @@
-use std::{collections::HashMap, sync::Arc};
-
-use axum::{Json, extract::State};
-use rand::Rng;
 use super::model::Lottery;
-use crate::{Error, Result, AppState};
-pub async fn handler_lottery(State(data): State<Arc<AppState>>) -> Result<Json<Lottery>> {
+use crate::{DynAppState, Error, Result};
+use axum::{extract::State, Json};
+
+pub async fn handler_lottery(State(data): State<DynAppState>) -> Result<Json<Lottery>> {
     println!(" ->> {:<12} - handler-lottery", "GET");
-	println!("{}", data.env.postgres.database);
+    println!("{}", data.get_env().postgres.database);
     let generated_numbers = loop {
-        let generated_numbers = generate_number().ok_or(Error::NotFoundError).unwrap();
-        if is_distributed(&generated_numbers) {
+        let generated_numbers = data
+            .get_lottery_service()
+            .generate_number()
+            .ok_or(Error::NotFoundError)
+            .unwrap();
+        if data
+            .get_lottery_service()
+            .is_distributed(&generated_numbers)
+        {
             continue;
         }
-		break generated_numbers;
+        break generated_numbers;
     };
     let lottery: Lottery = Lottery {
         numbers: generated_numbers,
     };
     let res: Json<Lottery> = Json(lottery);
     Ok(res)
-}
-
-fn is_distributed(numbers: &Vec<i32>) -> bool {
-    if numbers.len() != 6 {
-        return false;
-    }
-
-    let diffs: Vec<i32> = numbers.windows(2).map(|w| (w[1] - w[0]).abs()).collect();
-    let most_frequent_diff = find_most_frequent_number(&diffs)
-        .ok_or(Error::NoFrequentNumber)
-        .unwrap();
-
-    println!("{:?}", diffs);
-    diffs
-        .into_iter()
-        .filter(|&w| w == most_frequent_diff)
-        .count()
-        >= 3
-}
-
-fn find_most_frequent_number(numbers: &[i32]) -> Option<i32> {
-    let mut frequency_map = HashMap::new();
-
-    for &num in numbers {
-        *frequency_map.entry(num).or_insert(0) += 1;
-    }
-
-    let most_frequent = frequency_map.iter().max_by_key(|&(_, &count)| count);
-
-    match most_frequent {
-        Some((&number, _)) => Some(number),
-        None => None,
-    }
-}
-
-fn generate_number() -> Option<Vec<i32>> {
-    let mut rng = rand::thread_rng();
-
-    Some((0..6).fold(vec![], |mut acc, _| {
-        loop {
-            let throw = rng.gen_range(1..=45);
-            if acc.contains(&throw) {
-                continue;
-            }
-            acc.insert(acc.len(), throw);
-            break;
-        }
-        acc.sort();
-        acc
-    }))
 }
