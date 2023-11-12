@@ -7,7 +7,7 @@ use std::{collections::HashMap, sync::Arc};
 #[cfg_attr(test, automock)]
 #[async_trait]
 pub trait LotteryServiceTrait {
-    fn is_distributed(&self, numbers: &Vec<i32>) -> bool;
+    fn is_distributed(&self, numbers: &[i32]) -> bool;
     fn find_most_frequent_number(&self, numbers: &[i32]) -> Option<i32>;
     fn generate_number(&self) -> Option<Vec<i32>>;
 }
@@ -18,7 +18,7 @@ pub struct LotteryService;
 
 #[async_trait]
 impl LotteryServiceTrait for LotteryService {
-    fn is_distributed(&self, numbers: &Vec<i32>) -> bool {
+    fn is_distributed(&self, numbers: &[i32]) -> bool {
         if numbers.len() != 6 {
             return false;
         }
@@ -45,10 +45,7 @@ impl LotteryServiceTrait for LotteryService {
 
         let most_frequent = frequency_map.iter().max_by_key(|&(_, &count)| count);
 
-        match most_frequent {
-            Some((&number, _)) => Some(number),
-            None => None,
-        }
+        most_frequent.map(|(&number, _)| number)
     }
 
     fn generate_number(&self) -> Option<Vec<i32>> {

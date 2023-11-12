@@ -23,7 +23,7 @@ pub struct Postgres {
 
 impl EnvVars {
     pub fn new() -> Self {
-        EnvVars {
+        Self {
             postgres: Postgres {
                 user: env::var("POSTGRES_USER").unwrap_or("yacho".to_string()),
                 password: env::var("POSTGRES_PASSWORD").unwrap_or("password".to_string()),
@@ -43,5 +43,11 @@ impl EnvVars {
                     .unwrap_or(8080),
             },
         }
+    }
+}
+
+impl Default for EnvVars {
+    fn default() -> Self {
+        Self::new()
     }
 }

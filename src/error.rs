@@ -18,9 +18,9 @@ pub enum Error {
 
 #[derive(Debug)]
 pub enum BootError {
-	CronJobInitFailed,
-	CronJobRunFailed,
-	ApiFailed,
+	CronJobInit,
+	CronJobRun,
+	Api,
 }
 
 // region:    --- Error Boilerplate

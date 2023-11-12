@@ -22,9 +22,9 @@ impl LotteryCronJob {
     fn lottery_cron_job_error_handler<T>(err: JobSchedulerError) -> Result<T, BootError> {
         match err {
             tokio_cron_scheduler::JobSchedulerError::StartScheduler => {
-                Err(BootError::CronJobInitFailed)
+                Err(BootError::CronJobInit)
             }
-            _ => Err(BootError::CronJobRunFailed),
+            _ => Err(BootError::CronJobRun),
         }
     }
 }

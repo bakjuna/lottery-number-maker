@@ -2,5 +2,5 @@ use axum::response::{IntoResponse, Html};
 
 pub async fn handler_health() -> impl IntoResponse {
 	println!(" ->> {:<12} - handler-health", "GET");
-	Html(format!("OK"))
+	Html("OK".to_string())
 }

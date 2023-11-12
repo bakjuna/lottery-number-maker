@@ -110,8 +110,6 @@ async fn main() -> BootResult {
         .await;
     match server {
         Ok(app) => Ok(app),
-        Err(err) => match err {
-            _ => Err(BootError::ApiFailed),
-        },
+        Err(_err) => Err(BootError::Api),
     }
 }

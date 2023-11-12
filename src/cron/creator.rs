@@ -9,7 +9,7 @@ use crate::cron::handler::LotteryCronJob;
 pub async fn create_cron_jobs() -> Result<JobScheduler, BootError> {
 	let sched = JobScheduler::new().await;
 	if sched.is_err() {
-		return Err(BootError::CronJobInitFailed);
+		return Err(BootError::CronJobInit);
 	}
 	let sched = sched.unwrap();
 
@@ -18,7 +18,7 @@ pub async fn create_cron_jobs() -> Result<JobScheduler, BootError> {
 		.add(latest_lottery_cron_job.fetch_latest_lottery_winning_numbers().unwrap())
 		.await;
 	if res.is_err() {
-		return Err(BootError::CronJobRunFailed);
+		return Err(BootError::CronJobRun);
 	}
 	Ok(sched)
 }

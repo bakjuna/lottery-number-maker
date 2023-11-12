@@ -24,7 +24,7 @@ mod tests {
     #[tokio::test]
     async fn test_real_random_number() {
         let mut mock_state = MockAppStateTrait::new();
-        mock_state.expect_get_env().returning(|| EnvVars::new());
+        mock_state.expect_get_env().returning(EnvVars::new);
         mock_state.expect_get_lottery_service().returning(|| {
             let mut mock_lottery_service = MockLotteryServiceTrait::new();
             mock_lottery_service
