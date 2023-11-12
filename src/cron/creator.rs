@@ -14,6 +14,7 @@ pub async fn create_cron_jobs() -> Result<JobScheduler, BootError> {
 	let sched = sched.unwrap();
 
 	let latest_lottery_cron_job = Arc::new(LotteryCronJob {} );
+	// TODO: Ensure LotteryCronJob is on DynAppState
 	let res = sched
 		.add(latest_lottery_cron_job.fetch_latest_lottery_winning_numbers().unwrap())
 		.await;
