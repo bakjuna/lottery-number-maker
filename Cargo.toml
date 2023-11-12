@@ -29,6 +29,7 @@ rstest = "0.18.2"
 hyper = "0.14.27"
 
 [dev-dependencies]
+sqlx-cli = "0.7.2"
 clippy = "0.0.302"
 anyhow = "1"
 httpc-test = "0.1.1"

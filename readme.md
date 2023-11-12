@@ -59,7 +59,7 @@ make compile-dev
 ```
 make compile-prod
 ```
-## start server
+## Start Server
 This should ensure appropriate database is already started. Otherwise, start docker, not local server.
 ### dev
 ```
@@ -70,7 +70,7 @@ make start-dev
 make start-prod
 ```
 
-## watch
+## Watch
 To watch source codes,
 ```
 make watch
@@ -80,10 +80,20 @@ If you want to watch test codes, then
 make watch-tests
 ```
 
+## Migrations
+To make migrations, type
+```
+make migrate
+```
+To run migrations in your local computer, start server or type
+```
+make migrate-run
+```
+
 ## Dockerizing
 If you want to isolate all envs such as database, run docker-compose. You can simply start dockerizing with this command.
 ```
-make dcr
+make dcu
 ```
 
 If you want to stop it, then type

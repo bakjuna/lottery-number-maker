@@ -7,7 +7,8 @@ use axum::{middleware, Router};
 use dotenv::dotenv;
 use error::BootResult;
 use lottery::service::LotteryService;
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+
+use sqlx::{migrate, postgres::PgPoolOptions, Pool, Postgres};
 use std::net::SocketAddr;
 use std::sync::Arc;
 mod cron;
@@ -93,6 +94,11 @@ async fn main() -> BootResult {
 
     let ip_addr = app_state.get_env().server.address;
     let port = app_state.get_env().server.port;
+    let migrations = migrate!();
+    let db = app_state.get_db();
+    migrations.run(&db)
+        .await
+        .unwrap();
     let cron_jobs = cron::creator::create_cron_jobs().await.unwrap();
     cron_jobs.start().await.unwrap();
 
@@ -104,7 +110,6 @@ async fn main() -> BootResult {
         ));
     let addr = SocketAddr::new(ip_addr, port);
     println!("->> LISTENING on {addr} \n");
-
     let server = axum::Server::bind(&addr)
         .serve(routers_all.into_make_service())
         .await;

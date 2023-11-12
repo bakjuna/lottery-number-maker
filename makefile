@@ -27,9 +27,9 @@ watch-tests:
 	cargo watch -q -c -w . -x "test -- --nocapture"
 
 lint:
-	cargo clippy --fix --allow-dirty
+	cargo clippy --fix --allow-dirty --allow-staged
 
-dcr:
+dcu:
 	docker-compose up -d
 
 dcs:
@@ -51,3 +51,9 @@ image-mac:
 
 image-amd64:
 	docker buildx build --platform linux/amd64 -t lottery-number-maker .
+
+migrate:
+	sqlx migrate add
+
+migrate-run:
+	sqlx migrate run
