@@ -1,106 +1,54 @@
+pub use self::app_state::*;
 pub use self::env::EnvVars;
-pub use self::error::{Error, Result};
+pub use self::errors::{BootError, Error, Result};
 pub use self::log::log_request;
-use crate::error::BootError;
-use crate::lottery::service::DynLotteryService;
+pub use self::lottery::service::DynLotteryService;
 use axum::{middleware, Router};
-use dotenv::dotenv;
-use error::BootResult;
-use lottery::service::LotteryService;
+use errors::BootResult;
 
-use sqlx::{migrate, postgres::PgPoolOptions, Pool, Postgres};
-use std::net::SocketAddr;
+use sqlx::migrate;
+use std::net::{SocketAddr, IpAddr};
 use std::sync::Arc;
+mod app_state;
 mod cron;
 mod env;
-mod error;
+mod errors;
 mod health;
 mod log;
 mod lottery;
 mod middlewares;
-#[cfg(test)]
-use mockall::automock;
-struct AppState {
-    db: Pool<Postgres>,
-    env: EnvVars,
-    lottery_service: DynLotteryService,
-}
 
-#[cfg_attr(test, automock)]
-pub trait AppStateTrait {
-    fn get_db(&self) -> Pool<Postgres>;
-    fn get_env(&self) -> EnvVars;
-    fn get_lottery_service(&self) -> DynLotteryService;
-}
-
-impl AppStateTrait for AppState {
-    fn get_db(&self) -> Pool<Postgres> {
-        self.db.clone()
-    }
-    fn get_env(&self) -> EnvVars {
-        self.env.clone()
-    }
-
-    fn get_lottery_service(&self) -> DynLotteryService {
-        self.lottery_service.clone()
-    }
-}
-
-type DynAppState = Arc<dyn AppStateTrait + Send + Sync>;
-
-async fn create_app_state() -> DynAppState {
-    println!("Starting Server...");
-    dotenv().ok();
-    let envs = EnvVars::new();
-    let database_url = format!(
-        "{}{}{}{}{}{}{}{}{}{}{}",
-        "postgres://",
-        envs.postgres.user,
-        ":",
-        envs.postgres.password,
-        "@",
-        envs.postgres.host,
-        ":",
-        envs.postgres.port,
-        "/",
-        envs.postgres.database,
-        "?schema=public"
-    );
-    let pool = match PgPoolOptions::new()
-        .max_connections(10)
-        .connect(&database_url)
-        .await
-    {
-        Ok(pool) => {
-            println!("database connected");
-            pool
-        }
-        Err(err) => {
-            println!("database not connected: {:?}", err);
-            std::process::exit(1);
-        }
-    };
-    let envs = EnvVars::new();
-    let service = Arc::new(LotteryService {}) as DynLotteryService;
-    Arc::new(AppState {
-        db: pool,
-        env: envs,
-        lottery_service: service,
-    }) as DynAppState
-}
 #[tokio::main]
 async fn main() -> BootResult {
+    println!("Starting Server...");
     let app_state = create_app_state().await;
+    handle_cronjob().await;
+    handle_migrations(app_state.clone()).await;
+    handle_router(app_state.clone()).await
 
-    let ip_addr = app_state.get_env().server.address;
-    let port = app_state.get_env().server.port;
+}
+
+async fn handle_migrations(app_state: Arc<dyn AppStateTrait + Send + Sync>) {
+    println!("Migrating Database...");
     let migrations = migrate!();
     let db = app_state.get_db();
-    migrations.run(&db)
-        .await
-        .unwrap();
+    migrations.run(&db).await.unwrap_or_else(|e| {
+        println!("Migration Failed: {}", e);
+    });
+    println!("Migrating Completed");
+}
+
+async fn handle_cronjob() {
+    println!("Creating Cronjobs...");
     let cron_jobs = cron::creator::create_cron_jobs().await.unwrap();
+    println!("Creating Cronjobs Completed");
     cron_jobs.start().await.unwrap();
+}
+
+async fn handle_router(app_state: Arc<dyn AppStateTrait + Send + Sync>) -> BootResult {
+    println!("Creating Routers...");
+    let ip_addr: IpAddr = app_state.get_env().server.address;
+    let port: u16 = app_state.get_env().server.port;
 
     let routers_all: Router = Router::new()
         .nest("/", health::route::router_health())
@@ -108,11 +56,11 @@ async fn main() -> BootResult {
         .layer(middleware::map_response(
             middlewares::middleware::main_response_mapper,
         ));
-    let addr = SocketAddr::new(ip_addr, port);
+    let addr: SocketAddr = SocketAddr::new(ip_addr, port);
     println!("->> LISTENING on {addr} \n");
     let server = axum::Server::bind(&addr)
-        .serve(routers_all.into_make_service())
-        .await;
+    .serve(routers_all.into_make_service())
+    .await;
     match server {
         Ok(app) => Ok(app),
         Err(_err) => Err(BootError::Api),

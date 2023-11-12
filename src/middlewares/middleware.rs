@@ -2,7 +2,7 @@ use axum::{http::{Uri, Method}, response::{Response, IntoResponse}, Json};
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::{log_request, error::Error};
+use crate::{log_request, errors::Error};
 
 
 pub async fn main_response_mapper(

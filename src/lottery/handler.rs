@@ -4,7 +4,6 @@ use axum::{extract::State, Json};
 
 pub async fn handler_lottery(State(data): State<DynAppState>) -> Result<Json<Lottery>> {
     println!(" ->> {:<12} - handler-lottery", "GET");
-    println!("{}", data.get_env().postgres.database);
     let generated_numbers = loop {
         let generated_numbers = data
             .get_lottery_service()

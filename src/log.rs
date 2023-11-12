@@ -6,7 +6,7 @@ use serde_json::{Value, json};
 use serde_with::skip_serializing_none;
 use uuid::Uuid;
 
-use crate::error::{Error, ClientError};
+use crate::errors::{Error, ClientError};
 
 pub async fn log_request(
 	uuid: Uuid,

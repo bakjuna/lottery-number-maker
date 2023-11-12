@@ -1,6 +1,6 @@
 use tokio_cron_scheduler::{Job, JobSchedulerError};
 
-use crate::error::BootError;
+use crate::errors::BootError;
 
 pub struct LotteryCronJob {}
 impl LotteryCronJob {

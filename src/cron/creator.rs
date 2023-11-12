@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use tokio_cron_scheduler::JobScheduler;
 
-use crate::error::BootError;
+use crate::errors::BootError;
 use crate::cron::handler::LotteryCronJob;
 
 
