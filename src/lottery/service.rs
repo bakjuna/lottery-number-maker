@@ -3,6 +3,7 @@ use axum::async_trait;
 #[cfg(test)]
 use mockall::automock;
 use rand::Rng;
+use sqlx::{Postgres, Pool};
 use std::{collections::HashMap, sync::Arc};
 #[cfg_attr(test, automock)]
 #[async_trait]
@@ -14,7 +15,9 @@ pub trait LotteryServiceTrait {
 
 pub type DynLotteryService = Arc<dyn LotteryServiceTrait + Send + Sync>;
 #[derive(Debug, Clone)]
-pub struct LotteryService;
+pub struct LotteryService {
+    pub db: Pool<Postgres>
+}
 
 #[async_trait]
 impl LotteryServiceTrait for LotteryService {

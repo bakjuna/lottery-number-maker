@@ -67,11 +67,12 @@ pub async fn create_app_state() -> DynAppState {
         }
     };
     let envs = EnvVars::new();
-    let service = Arc::new(LotteryService {}) as DynLotteryService;
+    let service = Arc::new(LotteryService { db: pool.clone() }) as DynLotteryService;
 	println!("Creating App State Completed");
     Arc::new(AppState {
         db: pool,
         env: envs,
-        lottery_service: service,
+        lottery_service: service
     }) as DynAppState
+
 }
