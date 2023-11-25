@@ -2,6 +2,7 @@ pub use self::app_state::*;
 pub use self::env::EnvVars;
 pub use self::errors::{BootError, Error, Result};
 pub use self::log::log_request;
+pub use self::test::*;
 pub use self::lottery::service::DynLotteryService;
 use axum::{middleware, Router};
 use errors::BootResult;
@@ -17,6 +18,7 @@ mod health;
 mod log;
 mod lottery;
 mod middlewares;
+mod test;
 
 #[tokio::main]
 async fn main() -> BootResult {

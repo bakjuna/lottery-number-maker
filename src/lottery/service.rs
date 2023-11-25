@@ -3,17 +3,19 @@ use axum::async_trait;
 #[cfg(test)]
 use mockall::automock;
 use rand::Rng;
+use shaku::Interface;
 use std::{collections::HashMap, sync::Arc};
 #[cfg_attr(test, automock)]
 #[async_trait]
-pub trait LotteryServiceTrait {
+pub trait LotteryServiceTrait: Interface {
     fn is_distributed(&self, numbers: &[i32]) -> bool;
     fn find_most_frequent_number(&self, numbers: &[i32]) -> Option<i32>;
     fn generate_number(&self) -> Option<Vec<i32>>;
 }
 
-pub type DynLotteryService = Arc<dyn LotteryServiceTrait + Send + Sync>;
-#[derive(Debug, Clone)]
+
+#[derive(Component)]
+#[shaku(interface = HelloWorld)]
 pub struct LotteryService;
 
 #[async_trait]
